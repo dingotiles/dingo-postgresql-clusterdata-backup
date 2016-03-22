@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["drnicwilliams@gmail.com"]
 
   spec.summary       = %q{}
-  spec.description   = %q{Use fog library to upload/download clusterdata to backup object store}
-  spec.homepage      = "Use fog library to upload/download clusterdata to backup object store"
+  spec.description   = "Uses fog library to upload/download clusterdata to backup object store"
+  spec.homepage      = "Uses fog library to upload/download clusterdata to backup object store"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
