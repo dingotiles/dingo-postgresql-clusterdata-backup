@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'dingo/postgresql/clusterdata/backup'
 require 'fog'
 require 'json'
 
