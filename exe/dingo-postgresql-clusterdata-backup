@@ -47,7 +47,7 @@ when 'backup'
     $stderr.puts "STDIN JSON must include instance_id"
     exit 1
   end
-  backup_path="clusterdata-backup-#{instance_id}.json"
+  backup_path="dingo-postgresql-clusterdata-backup-#{instance_id}.json"
 
   file = bucket.files.create(key: backup_path, body: backup_data)
   puts "backup file #{file.key} created successfully"
