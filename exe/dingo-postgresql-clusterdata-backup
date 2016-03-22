@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require 'dingo/postgresql/clusterdata/backup'
+require 'fog'
+
+begin
+  bucket_name = Fog.credentials.delete(:bucket_name)
+  p storage = Fog::Storage.new(Fog.credentials)
+  p bucket = storage.directories.get(bucket_name)
+rescue Fog::Errors::LoadError
+  $stderr.puts "USAGE: FOG_RC=path/to/fog.yml dingo-postgresql-clusterdata-backup"
+  exit 1
+end
