@@ -1,4 +1,9 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in dingo-postgresql-clusterdata-backup.gemspec
-gemspec
+gem "fog", ">= 1", "< 2"
+gem "mime-types"
+group :development do
+  gem "bundler", "~> 1.11"
+  gem "rake", "~> 10.0"
+  gem "rspec", "~> 3.0"
+end
