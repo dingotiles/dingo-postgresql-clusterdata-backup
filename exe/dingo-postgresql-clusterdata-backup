@@ -2,12 +2,53 @@
 
 require 'dingo/postgresql/clusterdata/backup'
 require 'fog'
+require 'json'
+
+def usage
+  $stderr.puts "USAGE: FOG_RC=path/to/fog.yml dingo-postgresql-clusterdata-backup [backup|restore]"
+  exit 1
+end
+
+command=ARGV.shift
+usage if command.nil?
+usage unless %w[backup restore].include?(command)
+case command
+when 'backup'
+  if $stdin.tty?
+    $stderr.puts 'backup command expects STDIN json {"instance_id": "...", ...}'
+    exit 1
+  end
+end
 
 begin
+  fog_scope = ENV['FOG_CREDENTIAL'] == '' ? 'default' : ENV['FOG_CREDENTIAL']
   bucket_name = Fog.credentials.delete(:bucket_name)
-  p storage = Fog::Storage.new(Fog.credentials)
-  p bucket = storage.directories.get(bucket_name)
-rescue Fog::Errors::LoadError
-  $stderr.puts "USAGE: FOG_RC=path/to/fog.yml dingo-postgresql-clusterdata-backup"
-  exit 1
+  unless bucket_name
+    $stderr.puts "Specify #{fog_scope}.bucket_name in $FOG_RC file (#{ENV['FOG_RC']})"
+    exit 1
+  end
+  storage = Fog::Storage.new(Fog.credentials)
+  bucket = storage.directories.get(bucket_name)
+  unless bucket
+    $stderr.puts "Bucket #{bucket_name} does not exist"
+    exit 1
+  end
+rescue Fog::Errors::LoadError => e
+  puts e
+  usage
+end
+
+
+case command
+when 'backup'
+  backup_data = $stdin.read
+  instance_id = JSON.parse(backup_data)["instance_id"]
+  if instance_id.nil? || instance_id == ""
+    $stderr.puts "STDIN JSON must include instance_id"
+    exit 1
+  end
+  backup_path="clusterdata-backup-#{instance_id}.json"
+
+  file = bucket.files.create(key: backup_path, body: backup_data)
+  puts "backup file #{file.key} created successfully"
 end
