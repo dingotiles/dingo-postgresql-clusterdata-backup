@@ -4,13 +4,13 @@ require 'fog'
 require 'json'
 
 def usage
-  $stderr.puts "USAGE: FOG_RC=path/to/fog.yml dingo-postgresql-clusterdata-backup [backup|restore]"
+  $stderr.puts "USAGE: FOG_RC=path/to/fog.yml dingo-postgresql-clusterdata-backup [backup|restore|list-service-ids]"
   exit 1
 end
 
 command=ARGV.shift
 usage if command.nil?
-usage unless %w[backup restore].include?(command)
+usage unless %w[backup restore list-service-ids].include?(command)
 case command
 when 'backup'
   if $stdin.tty?
@@ -50,4 +50,12 @@ when 'backup'
 
   file = bucket.files.create(key: backup_path, body: backup_data)
   puts "backup file #{file.key} created successfully"
+when 'list-service-ids'
+  service_ids = bucket.files.map(&:key).inject([]) { |service_ids, key|
+    if key =~ %r{^dingo-postgresql-clusterdata-backup-(.*).json$}
+      service_ids << $1
+    end
+    service_ids
+  }
+  puts service_ids
 end
