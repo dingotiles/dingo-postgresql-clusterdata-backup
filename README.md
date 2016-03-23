@@ -12,16 +12,22 @@ To backup a cluster's data, pass the data to the executable via `STDIN`:
 echo '{"instance_id": "cloudfoundry_instance_id", ...}' | bundle exec dingo-postgresql-clusterdata-backup backup
 ```
 
+To get a list of backed up instance_ids, run:
+
+```
+bundle exec dingo-postgresql-clusterdata-backup restore list-service-ids
+```
+
 To restore a cluster's data from its backup location:
 
 ```
-bundle exec dingo-postgresql-clusterdata-backup restore --instance-id cloudfoundry_instance_id
+bundle exec dingo-postgresql-clusterdata-backup restore cloudfoundry_instance_id
 ```
 
 The `STDOUT` will solely contain the original cluster data:
 
 ```json
-{"instance_id": "cloudfoundry_instance_id", ...}
+{"instance_id": "cloudfoundry_instance_id", }
 ```
 
 To configure `dingo-postgresql-clusterdata-backup` subcommands `backup` and `restore` provide a configuration file via the `FOG_RC` environment variables. The top-level key `default` can be overridden with the `FOG_CREDENTIAL` environment variable.
