@@ -43,7 +43,7 @@ when 'backup'
   backup_data = $stdin.read
   instance_id = JSON.parse(backup_data)["instance_id"]
   if instance_id.nil? || instance_id == ""
-    $stderr.puts "STDIN JSON must include instance_id"
+    $stderr.puts 'backup command expects STDIN json {"instance_id": "...", ...}'
     exit 1
   end
   backup_path="dingo-postgresql-clusterdata-backup-#{instance_id}.json"
