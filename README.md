@@ -4,6 +4,8 @@ This project includes `dingo-postgresql-clusterdata-backup` executable which can
 
 The backup location can be any blob store/object store/bucket supported by the https://fog.io library.
 
+The intent of this project is to avoid coupling Dingo PostgreSQL to AWS-specific tooling.
+
 ## Usage
 
 To backup a cluster's data, pass the data to the executable via `STDIN`:
