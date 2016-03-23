@@ -45,6 +45,21 @@ default:
   bucket_name: our-dingo-postgresql-clusterdata-backups
 ```
 
+The `list-service-ids` and `restore` commands can be combined to restore all backed up JSON for all instance IDs:
+
+```
+export FOG_RC=path/to/fog.yml
+bundle exec exe/dingo-postgresql-clusterdata-backup list-service-ids | bundle exec exe/dingo-postgresql-clusterdata-backup restore
+```
+
+Will return one JSON per STDOUT, and errors on STDERR:
+
+```json
+{"instance_id":"TESTID-1458682941","service_id":"beb5973c-e1b2-11e5-a736-c7c0b526363d","plan_id":"b96d0936-e423-11e5-accb-93d374e93368","organization_guid":"","space_guid":"","parameters":null,"node_count":1,"node_size":20,"allocated_port":"33000"}
+{"instance_id":"TESTID-1458684292","service_id":"beb5973c-e1b2-11e5-a736-c7c0b526363d","plan_id":"1545e30e-6dc3-11e5-826a-6c4008a663f0","organization_guid":"","space_guid":"","parameters":null,"node_count":1,"node_size":20,"allocated_port":"33007"}
+{"instance_id":"TESTID-1458685135","service_id":"beb5973c-e1b2-11e5-a736-c7c0b526363d","plan_id":"b96d0936-e423-11e5-accb-93d374e93368","organization_guid":"","space_guid":"","parameters":null,"node_count":1,"node_size":20,"allocated_port":"33000"}
+```
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/dingotiles/dingo-postgresql-clusterdata-backup. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.

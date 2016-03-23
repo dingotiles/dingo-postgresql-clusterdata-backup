@@ -64,13 +64,17 @@ when 'list-service-ids'
   }
   puts service_ids
 when 'restore'
-  instance_id = $stdin.read.strip
-  backup_path="dingo-postgresql-clusterdata-backup-#{instance_id}.json"
-  file = bucket.files.get(backup_path)
-  if file
-    puts file.body
-  else
-    $stderr.puts "instance_id #{instance_id} backup not found; run 'list-service-ids' to see available instance_ids"
-    exit 1
+  instance_ids = $stdin.readlines.map(&:strip)
+  errors = false
+  instance_ids.each do |instance_id|
+    backup_path="dingo-postgresql-clusterdata-backup-#{instance_id}.json"
+    file = bucket.files.get(backup_path)
+    if file
+      puts file.body
+    else
+      $stderr.puts "#{instance_id}: backup not found; run 'list-service-ids' to see available instance_ids"
+      errors = true
+    end
   end
+  exit 1 if errors
 end
