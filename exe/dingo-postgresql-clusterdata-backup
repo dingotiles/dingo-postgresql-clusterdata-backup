@@ -17,6 +17,12 @@ when 'backup'
     $stderr.puts 'backup command expects STDIN json {"instance_id": "...", ...}'
     exit 1
   end
+when 'restore'
+  instance_id = ARGV.shift
+  unless instance_id
+    $stderr.puts 'USAGE: dingo-postgresql-clusterdata-backup restore instance_id'
+    exit 1
+  end
 end
 
 begin
@@ -58,4 +64,13 @@ when 'list-service-ids'
     service_ids
   }
   puts service_ids
+when 'restore'
+  backup_path="dingo-postgresql-clusterdata-backup-#{instance_id}.json"
+  file = bucket.files.get(backup_path)
+  if file
+    puts file.body
+  else
+    $stderr.puts "instance_id #{instance_id} backup not found; run 'list-service-ids' to see available instance_ids"
+    exit 1
+  end
 end
