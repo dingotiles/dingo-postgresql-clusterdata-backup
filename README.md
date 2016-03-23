@@ -17,13 +17,13 @@ echo '{"instance_id": "cloudfoundry_instance_id", ...}' | bundle exec dingo-post
 To get a list of backed up instance_ids, run:
 
 ```
-bundle exec dingo-postgresql-clusterdata-backup restore list-service-ids
+bundle exec dingo-postgresql-clusterdata-backup list-service-ids
 ```
 
-To restore a cluster's data from its backup location:
+To restore a cluster's data from its backup location pass the instance ID via `STDIN`:
 
 ```
-bundle exec dingo-postgresql-clusterdata-backup restore cloudfoundry_instance_id
+echo "cloudfoundry_instance_id" | bundle exec dingo-postgresql-clusterdata-backup restore
 ```
 
 The `STDOUT` will solely contain the original cluster data:
