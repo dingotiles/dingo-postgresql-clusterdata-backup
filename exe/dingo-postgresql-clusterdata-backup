@@ -10,7 +10,7 @@ end
 
 command=ARGV.shift
 usage if command.nil?
-usage unless %w[backup restore list-service-ids].include?(command)
+usage unless %w[backup restore list-service-ids display-backups].include?(command)
 case command
 when 'backup'
   if $stdin.tty?
@@ -42,7 +42,6 @@ rescue Fog::Errors::LoadError => e
   usage
 end
 
-
 case command
 when 'backup'
   backup_data = $stdin.read
@@ -63,6 +62,33 @@ when 'list-service-ids'
     service_ids
   }
   puts service_ids
+when 'display-backups'
+  simultaneous_downloads = 5
+  require 'thread'
+  work_q = Queue.new
+  bucket.files.each{|file| work_q.push(file) }
+  workers = (0...simultaneous_downloads).map do
+    Thread.new do
+      begin
+        while file = work_q.pop(true)
+          begin
+            if file.key =~ %r{^dingo-postgresql-clusterdata-backup-(.*).json$}
+              json_str = file.body
+              backup_data = JSON.parse(json_str)
+              instance_id = backup_data['instance_id']
+              space_guid = backup_data['space_guid']
+              name = backup_data['service_instance_name'] || 'no-name'
+              puts "#{name}\t| #{instance_id} | #{space_guid}"
+            end
+          rescue JSON::ParserError
+            $stderr.puts "Failed to parse #{file.key}: #{json_str}"
+          end
+        end
+      rescue ThreadError
+      end
+    end
+  end
+  workers.map(&:join)
 when 'restore'
   instance_ids = $stdin.readlines.map(&:strip)
   errors = false
