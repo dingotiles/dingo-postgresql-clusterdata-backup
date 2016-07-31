@@ -119,7 +119,7 @@ when 'find-by-name'
               space_guid = backup_data['space_guid']
               name = backup_data['service_instance_name'] || 'no-name'
               if name == find_name && space_guid == find_space_guid
-                puts instance_id
+                puts backup_data.to_json
                 exit 0
               end
             end
