@@ -4,13 +4,13 @@ require 'fog'
 require 'json'
 
 def usage
-  $stderr.puts "USAGE: FOG_RC=path/to/fog.yml dingo-postgresql-clusterdata-backup [backup|restore|list-service-ids|display-backups|find-by-name]"
+  $stderr.puts "USAGE: FOG_RC=path/to/fog.yml dingo-postgresql-clusterdata-backup [backup|restore|list-service-ids|find-by-name]"
   exit 1
 end
 
 command=ARGV.shift
 usage if command.nil?
-usage unless %w[backup restore list-service-ids display-backups find-by-name].include?(command)
+usage unless %w[backup restore list-service-ids find-by-name].include?(command)
 case command
 when 'backup'
   if $stdin.tty?
@@ -67,33 +67,6 @@ when 'list-service-ids'
     service_ids
   }
   puts service_ids
-when 'display-backups'
-  simultaneous_downloads = 5
-  require 'thread'
-  work_q = Queue.new
-  bucket.files.each{|file| work_q.push(file) }
-  workers = (0...simultaneous_downloads).map do
-    Thread.new do
-      begin
-        while file = work_q.pop(true)
-          begin
-            if file.key =~ %r{^dingo-postgresql-clusterdata-backup-(.*).json$}
-              json_str = file.body
-              backup_data = JSON.parse(json_str)
-              instance_id = backup_data['instance_id']
-              space_guid = backup_data['space_guid']
-              name = backup_data['service_instance_name'] || 'no-name'
-              puts "#{name}\t| #{instance_id} | #{space_guid}"
-            end
-          rescue JSON::ParserError
-            $stderr.puts "Failed to parse #{file.key}: #{json_str}"
-          end
-        end
-      rescue ThreadError
-      end
-    end
-  end
-  workers.map(&:join)
 when 'find-by-name'
   input = JSON.parse($stdin.read)
   find_name = input['name']
