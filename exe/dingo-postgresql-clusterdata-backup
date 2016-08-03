@@ -76,8 +76,9 @@ when 'find-by-name'
     exit 1
   end
 
-  # TODO: fetch LATEST, not FIRST - means looking thru all backups; not exiting early
-  latest_backup_data, latest_last_modified, mutex = nil, Fog::Time.now, Mutex.new
+  latest_backup_data = nil
+  latest_last_modified = nil
+  mutex = Mutex.new
 
   simultaneous_downloads = 5
   require 'thread'
@@ -96,8 +97,9 @@ when 'find-by-name'
               name = backup_data['service_instance_name']
               if name == find_name && space_guid == find_space_guid
                 mutex.synchronize do
-                  if last_modified < latest_last_modified
+                  if latest_last_modified.nil? || last_modified > latest_last_modified
                     latest_backup_data = backup_data
+                    latest_last_modified = last_modified
                   end
                 end
               end
