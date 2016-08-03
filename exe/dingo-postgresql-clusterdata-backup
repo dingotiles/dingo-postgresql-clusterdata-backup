@@ -76,6 +76,9 @@ when 'find-by-name'
     exit 1
   end
 
+  # TODO: fetch LATEST, not FIRST - means looking thru all backups; not exiting early
+  latest_backup_data, latest_last_modified, mutex = nil, Fog::Time.now, Mutex.new
+
   simultaneous_downloads = 5
   require 'thread'
   work_q = Queue.new
@@ -84,16 +87,19 @@ when 'find-by-name'
     Thread.new do
       begin
         while file = work_q.pop(true)
+          last_modified = file.last_modified
           begin
             if file.key =~ %r{^dingo-postgresql-clusterdata-backup-(.*).json$}
               json_str = file.body
               backup_data = JSON.parse(json_str)
-              instance_id = backup_data['instance_id']
               space_guid = backup_data['space_guid']
-              name = backup_data['service_instance_name'] || 'no-name'
+              name = backup_data['service_instance_name']
               if name == find_name && space_guid == find_space_guid
-                puts backup_data.to_json
-                exit 0
+                mutex.synchronize do
+                  if last_modified < latest_last_modified
+                    latest_backup_data = backup_data
+                  end
+                end
               end
             end
           rescue JSON::ParserError
@@ -105,8 +111,12 @@ when 'find-by-name'
     end
   end
   workers.map(&:join)
-  $stderr.puts("service instance not found for space_guid #{find_space_guid} and name #{find_name}")
-  exit 1
+  if latest_backup_data
+    puts latest_backup_data.to_json
+  else
+    $stderr.puts("service instance not found for space_guid #{find_space_guid} and name #{find_name}")
+    exit 1
+  end
 when 'restore'
   instance_ids = $stdin.readlines.map(&:strip)
   errors = false
